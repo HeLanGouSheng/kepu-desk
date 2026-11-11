@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>科普视频审稿台</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="desk.css?v=20261111">
+</head>
+<body>
+<header id="top" hidden>
+  <b>审稿台</b><span id="who"></span>
+  <span class="grow"></span>
+  <button id="refresh" type="button">刷新</button>
+  <button id="logout" type="button">退出</button>
+</header>
+
+<section id="login" hidden>
+  <h1>科普视频审稿台</h1>
+  <p class="sub">内容都在私有仓库里，登录后才看得到。口令只存在这台电脑的浏览器里，只用来读写审稿仓库。</p>
+  <label>审稿仓库<input id="repo" placeholder="账号/仓库名" autocomplete="off" spellcheck="false"></label>
+  <label>GitHub 口令<input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_… 或 ghp_…"></label>
+  <label class="row"><input id="remember" type="checkbox" checked> 在这台电脑上记住（不勾就是关掉浏览器标签后要重新贴）</label>
+  <div><button id="enter" type="button">登录</button> <span id="loginmsg" class="msg"></span></div>
+  <details>
+    <summary>口令怎么生成（第一次用看这里）</summary>
+    <ol>
+      <li>在 GitHub 网站右上角点头像 → <b>Settings</b> → 左边最下面 <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>。</li>
+      <li>名字随便起（比如「审稿台」），有效期按需要选。</li>
+      <li><b>Repository access</b> 选 <b>Only select repositories</b>，选上面那个审稿仓库。</li>
+      <li><b>Permissions</b> → Repository permissions → <b>Contents</b> 选 <b>Read and write</b>（别的不用动）。</li>
+      <li>点 Generate token，复制那串字（只显示这一次），贴到上面。</li>
+    </ol>
+    <p class="sub">在 Fine-grained tokens 里选不到这个仓库的话（你是被邀请进来的协作者时可能这样），改用 <b>Tokens (classic)</b> → Generate new token (classic)，勾 <b>repo</b>。</p>
+  </details>
+</section>
+
+<section id="list" hidden>
+  <nav id="tabs"></nav>
+  <div id="progress"></div>
+  <table>
+    <thead><tr><th>片子</th><th>状态</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p class="sub">点「开始」就认领了这一集（别人能看到是你在做）；做完点页面底下的提交按钮。列表每分钟自己刷新一次。</p>
+</section>
+
+<section id="task" hidden>
+  <div class="taskbar">
+    <button id="back" type="button">← 回列表</button>
+    <b id="tasktitle"></b>
+    <span id="taskmsg" class="msg"></span>
+    <span class="grow"></span>
+    <button id="release" type="button" title="不做这一集了，让别人做">放弃认领</button>
+  </div>
+  <iframe id="frame" title="审稿页面" sandbox="allow-scripts allow-forms allow-popups"></iframe>
+</section>
+
+<script type="module" src="desk.js?v=20261111d"></script>
+</body>
+</html>
