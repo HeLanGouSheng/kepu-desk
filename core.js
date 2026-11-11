@@ -30,11 +30,16 @@ export function parseTree(entries) {
   return t;
 }
 
-/** 片子排序：先按集号、再按上中下、再按名字 */
+/** 片子排序：先按领域、再按集号、再按上中下、再按名字 */
 const PART_ORDER = { 上: 1, 中: 2, 下: 3 };
 export function sortKey(pid, ep) {
   const e = ep || {};
-  return [String(e.episode || ''), PART_ORDER[e.part] || 9, pid];
+  return [String(e.domain || ''), String(e.episode || ''), PART_ORDER[e.part] || 9, pid];
+}
+
+/** 这些行里有哪几个领域（去重、排好序；没标领域的不算） */
+export function domainsOf(rs) {
+  return [...new Set(rs.map((r) => (r.ep || {}).domain || ''))].filter(Boolean).sort();
 }
 function cmp(a, b) {
   for (let i = 0; i < a.length; i++) {

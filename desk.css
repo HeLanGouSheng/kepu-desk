@@ -28,6 +28,9 @@ header#top #who { color: var(--sub); font-size: 13px; }
 #list { max-width: 980px; margin: 0 auto; padding: 16px; }
 #tabs { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
 #tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+#domains { display: flex; gap: 6px; align-items: center; margin: -4px 0 10px; flex-wrap: wrap; }
+#domains button { font-size: 13px; padding: 3px 10px; }
+#domains button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 #tabs .mine { margin-left: auto; font-size: 13px; color: var(--sub); }
 #progress .bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--free); }
 #progress .seg.imported, #progress i.imported { background: var(--imported); }

@@ -1,6 +1,6 @@
 // 科普视频审稿台网页：登录（GitHub 口令）→ 列表（谁在做、谁交了）→ 打开一集（页面在下面的框里）→ 提交写回私有仓库。
 // 这个文件只有程序，不含任何讲稿；讲稿、配音都在私有仓库里，登录后才取得到。纯函数在 core.js。
-import { STAGES, STATE_NAME, ago, b64, encPath, isStale, makeResult, normRepo, parseTree, payloadOk, rows, summary } from './core.js';
+import { STAGES, STATE_NAME, ago, b64, domainsOf, encPath, isStale, makeResult, normRepo, parseTree, payloadOk, rows, summary } from './core.js';
 
 const APP = '2026-11-11';
 const API = 'https://api.github.com';
@@ -159,8 +159,22 @@ function renderList() {
     tabs.append(el('button', { class: st === S.stage ? 'on' : '', onclick: () => { S.stage = st; renderList(); } }, `${name}（${open ? `还剩 ${open}` : sm.total ? '都做完了' : '没有'}）`));
   }
   tabs.append(el('label', { class: 'mine' }, el('input', { type: 'checkbox', checked: S.mineOnly, onchange: (e) => { S.mineOnly = e.target.checked; renderList(); } }), ' 只看我的'));
+  // 领域页签（11-11 用户：三个领域放一个网页里、选项卡切）；选过的记在这台电脑上
+  const every = rows(S.tree, S.desk, S.claimInfo, S.login, S.stage);
+  const domains = domainsOf(every);
+  if (S.domain === undefined) S.domain = store.get('domain');
+  if (S.domain && !domains.includes(S.domain)) S.domain = '';
+  const dn = $('domains');
+  dn.textContent = '';
+  dn.hidden = domains.length < 2;
+  if (domains.length >= 2) {
+    for (const d of ['', ...domains]) {
+      const n = d ? every.filter((r) => (r.ep || {}).domain === d).length : every.length;
+      dn.append(el('button', { class: d === S.domain ? 'on' : '', onclick: () => { S.domain = d; store.set('domain', d); renderList(); } }, `${d || '全部'}（${n}）`));
+    }
+  }
   // 进度
-  const all = rows(S.tree, S.desk, S.claimInfo, S.login, S.stage);
+  const all = S.domain ? every.filter((r) => (r.ep || {}).domain === S.domain) : every;
   const sm = summary(all);
   const bar = $('progress');
   bar.textContent = '';
@@ -178,7 +192,7 @@ function renderList() {
   if (!rs.length) tb.append(el('tr', {}, el('td', { colspan: 3, class: 'empty' }, all.length ? '没有我的' : '这个阶段还没有要审的')));
   for (const r of rs) {
     const ep = r.ep || {};
-    const what = el('div', {}, el('b', {}, ep.title || r.pid), el('div', { class: 'sub' }, [ep.episode, ep.part && `${ep.part}集`, ep.frames && `第 ${ep.frames} 帧`, r.pid].filter(Boolean).join(' · ')));
+    const what = el('div', {}, el('b', {}, ep.title || r.pid), el('div', { class: 'sub' }, [!S.domain && ep.domain, ep.episode, ep.part && `${ep.part}集`, ep.frames && `第 ${ep.frames} 帧`, r.pid].filter(Boolean).join(' · ')));
     let st = STATE_NAME[r.state];
     if (r.state === 'taken' || r.state === 'mine') st += r.claim && r.claim.by ? `：${r.claim.by}，${ago(r.claim.at)}` : '';
     if (r.state === 'done' || r.state === 'imported') st += `：${r.results.join('、')}`;
