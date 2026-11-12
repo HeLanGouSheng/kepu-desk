@@ -1,8 +1,15 @@
 // 审稿台网页的纯函数（不碰网络、不碰页面）：仓库文件树 → 每集状态；node 也能跑（desk/check.mjs 钉住）。
 // 仓库布局见 pipeline/desk.py 开头：tasks/<阶段>/<片子>/page.html、claims/<阶段>/<片子>.json、results/<阶段>/<片子>/<账号>.json、imported/<阶段>/<片子>.json
 
-export const STAGES = { pick: '三选一', listen: '听评' };
+// 顺序就是流程（11-12 用户定）：挑版本（哪段想改当场改）→ 配音前对着文字细改 → 配音 → 听评
+export const STAGES = { pick: '三选一', edit: '细改', listen: '听评' };
+export const STAGE_HINT = {
+  pick: '三版盲挑：选总体用哪版，哪段想用别版就点那一栏，想改字当场改',
+  edit: '配音之前对着整篇文字改：点哪句改哪句，改定了才去配音',
+  listen: '对着配音听：有没有念错、停顿不对，最后的微调',
+};
 export const STALE_HOURS = 12; // 认领超过这么久没交，别人可以直接接手
+export const NO_DOMAIN = '其他';
 
 /** git/trees?recursive=1 的 tree 数组 → { tasks, claims, results, imported, sha }（每样按阶段 → 片子） */
 export function parseTree(entries) {
@@ -37,9 +44,15 @@ export function sortKey(pid, ep) {
   return [String(e.domain || ''), String(e.episode || ''), PART_ORDER[e.part] || 9, pid];
 }
 
-/** 这些行里有哪几个领域（去重、排好序；没标领域的不算） */
+/** 一行属于哪个领域（没标的归「其他」） */
+export function domainOf(r) {
+  return ((r && r.ep) || {}).domain || NO_DOMAIN;
+}
+
+/** 这些行里有哪几个领域（去重、排好序；「其他」放最后） */
 export function domainsOf(rs) {
-  return [...new Set(rs.map((r) => (r.ep || {}).domain || ''))].filter(Boolean).sort();
+  const ds = [...new Set(rs.map(domainOf))].sort();
+  return ds.filter((d) => d !== NO_DOMAIN).concat(ds.includes(NO_DOMAIN) ? [NO_DOMAIN] : []);
 }
 function cmp(a, b) {
   for (let i = 0; i < a.length; i++) {
@@ -75,6 +88,43 @@ export function summary(rs) {
   const s = { total: rs.length, imported: 0, done: 0, mine: 0, taken: 0, free: 0 };
   for (const r of rs) s[r.state] += 1;
   return s;
+}
+
+/** 还没人交的有几集 */
+export function openCount(rs) {
+  const s = summary(rs);
+  return s.total - s.imported - s.done;
+}
+
+/** 做完这一集接着做哪一集：同一张表里它后面第一条「没人做 / 我在做」的，后面没有就从头找；没有回 null */
+export function nextRow(rs, pid) {
+  const i = rs.findIndex((r) => r.pid === pid);
+  const order = rs.slice(i + 1).concat(rs.slice(0, Math.max(i, 0)));
+  return order.find((r) => r.pid !== pid && (r.state === 'free' || r.state === 'mine')) || null;
+}
+
+/** 第一次来落在哪：有活的第一个领域、那个领域里有活的第一个阶段（都没有就第一个领域、第一个有页面的阶段） */
+export function firstStop(byStage, domains) {
+  const stages = Object.keys(STAGES);
+  for (const d of domains) for (const st of stages) if (openCount((byStage[st] || []).filter((r) => domainOf(r) === d))) return { domain: d, stage: st };
+  for (const d of domains) for (const st of stages) if ((byStage[st] || []).some((r) => domainOf(r) === d)) return { domain: d, stage: st };
+  return { domain: domains[0] || '', stage: stages[0] };
+}
+
+/** 地址栏 # 后面那段 ↔ { domain, stage, pid }（刷新、后退、发链接都落回原处） */
+export function makeHash(v) {
+  const parts = [v.domain || '', v.stage || ''];
+  if (v.pid) parts.push(v.pid);
+  return '#/' + parts.map(encodeURIComponent).join('/');
+}
+export function parseHash(h) {
+  const p = String(h || '').replace(/^#\/?/, '').split('/').map((x) => { try { return decodeURIComponent(x); } catch { return ''; } });
+  return { domain: p[0] || '', stage: STAGES[p[1]] ? p[1] : '', pid: p[2] || '' };
+}
+
+/** 草稿在浏览器里的名字（一个仓库、一个阶段、一集一份） */
+export function draftKey(repo, stage, pid) {
+  return `draft:${repo}:${stage}:${pid}`;
 }
 
 /** 「3 分钟前」 */

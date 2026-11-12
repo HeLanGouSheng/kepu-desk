@@ -1,62 +1,93 @@
+/* 和框里的审稿页面同一套深色（11-12：外面浅、里面深，打开一集时晃眼） */
 :root {
-  --bg: #f6f4ef; --panel: #fff; --ink: #1d1f1c; --sub: #6b6f68; --line: #dedad0; --accent: #2f5bd3;
-  --imported: #2e7d4f; --done: #7fbf8f; --taken: #e2a33a; --free: #d9d5cc;
+  --bg: #15181c; --panel: #1d2126; --raise: #252a31; --ink: #e8e6e0; --sub: #9aa39c; --line: #2f353c; --accent: #f7d96b; --accent-ink: #1f2a24;
+  --imported: #6fcf97; --done: #3d8b5f; --taken: #e2a33a; --free: #3a4048; --bad: #f2a29b;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
-body { background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
-button { font: inherit; padding: 5px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif; }
+button { font: inherit; color: var(--ink); padding: 5px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--raise); cursor: pointer; }
 button:hover { border-color: var(--accent); }
-input { font: inherit; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+button:focus-visible, tr:focus-visible, input:focus-visible { outline: 2px solid #8fd3f4; outline-offset: 1px; }
+input { font: inherit; color: var(--ink); }
 .sub { color: var(--sub); font-size: 13px; }
-.msg { color: var(--sub); }
+.msg { color: var(--sub); font-size: 13px; }
 .grow { flex: 1; }
 
-header#top { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
-header#top #who { color: var(--sub); font-size: 13px; }
+#toast { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 20; max-width: min(92vw, 640px); padding: 8px 16px; border-radius: 10px;
+  background: var(--raise); border: 1px solid var(--line); box-shadow: 0 8px 24px #0008; font-size: 14px; }
+#toast.bad { border-color: var(--bad); color: var(--bad); }
 
-#login { max-width: 560px; margin: 8vh auto; padding: 28px 32px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+header#top { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+header#top #who { color: var(--sub); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+#login { max-width: 560px; margin: 8vh auto; padding: 28px 32px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
 #login h1 { margin: 0 0 6px; font-size: 22px; }
 #login label { display: block; margin: 14px 0 6px; font-weight: 600; }
-#login label input:not([type=checkbox]) { display: block; width: 100%; margin-top: 4px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; font-weight: 400; }
+#login label input:not([type=checkbox]) { display: block; width: 100%; margin-top: 4px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; font-weight: 400; background: var(--bg); }
 #login label.row { font-weight: 400; font-size: 13px; color: var(--sub); }
 #login details { margin-top: 18px; font-size: 14px; }
-#login summary { cursor: pointer; color: var(--accent); }
+#login summary { cursor: pointer; color: #8fd3f4; }
 #login ol { padding-left: 20px; }
+#loginmsg { color: var(--bad); }
 
 #list { max-width: 980px; margin: 0 auto; padding: 16px; }
-#tabs { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-#tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-#domains { display: flex; gap: 6px; align-items: center; margin: -4px 0 10px; flex-wrap: wrap; }
-#domains button { font-size: 13px; padding: 3px 10px; }
-#domains button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+/* 第一层：领域。大页签，一眼看到每个领域还剩几集 */
+#domains { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+#domains button { flex: 1 1 160px; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 10px 16px; border-radius: 12px; background: var(--panel); text-align: left; }
+#domains button b { font-size: 17px; }
+#domains button span { font-size: 13px; color: var(--sub); }
+#domains button.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: #262a1b; }
+#domains button.on span { color: var(--accent); }
+/* 第二层：这个领域下的三步，按流程从左到右 */
+#tabs { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+#tabs button { display: flex; gap: 8px; align-items: baseline; }
+#tabs button span { font-size: 12px; color: var(--sub); }
+#tabs button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
+#tabs button.on span { color: #4a4f48; }
+#tabs button.none:not(.on) { opacity: .55; }
+#tabs .arrow { color: var(--sub); }
 #tabs .mine { margin-left: auto; font-size: 13px; color: var(--sub); }
-#progress .bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--free); }
+#stagehint { margin: 0 0 12px; }
+#continue { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; padding: 8px 12px; border: 1px solid var(--taken); border-radius: 10px; background: #2a2416; font-size: 14px; }
+#progress .bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--free); }
 #progress .seg.imported, #progress i.imported { background: var(--imported); }
 #progress .seg.done, #progress i.done { background: var(--done); }
 #progress .seg.taken, #progress i.taken { background: var(--taken); }
 #progress .seg.free, #progress i.free { background: var(--free); }
 #progress .legend { margin: 6px 0 12px; font-size: 13px; color: var(--sub); }
 #progress .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-th { font-size: 13px; color: var(--sub); font-weight: 500; background: #faf9f6; }
-td.state { font-size: 14px; white-space: nowrap; }
-td.empty { color: var(--sub); text-align: center; padding: 28px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 13px; color: var(--sub); font-weight: 500; background: var(--raise); }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: var(--raise); }
+td.state { font-size: 13px; color: var(--sub); }
+td.act { text-align: right; white-space: nowrap; }
+td.empty { color: var(--sub); text-align: center; padding: 28px; cursor: default; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--free); }
 .dot.imported { background: var(--imported); }
 .dot.done { background: var(--done); }
 .dot.taken, .dot.mine { background: var(--taken); }
-tr.s-mine td { background: #fff8ea; }
+tr.s-mine td { background: #2a2416; }
+tr.s-done td:first-child b, tr.s-imported td:first-child b { color: var(--sub); font-weight: 500; }
 
 #task { display: flex; flex-direction: column; height: calc(100vh - 47px); }
 #task[hidden] { display: none; }
 #task .taskbar { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
-#task iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+#task .taskbar b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+#task .taskbar .msg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+#task .taskbar button { flex: none; }
+#task iframe { flex: 1; width: 100%; border: 0; background: var(--bg); }
 
 @media (max-width: 640px) {
   #login { margin: 16px; padding: 18px; }
   #list { padding: 10px; }
-  th:nth-child(2), td.state { white-space: normal; }
+  th:nth-child(2), td.state { display: none; }
+  #task .taskbar { gap: 8px; padding: 6px 10px; flex-wrap: wrap; }
+  #task .taskbar .msg { flex-basis: 100%; order: 9; }
+  #tabs .mine { margin-left: 0; flex-basis: 100%; }
 }

@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
 <title>科普视频审稿台</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="desk.css?v=20261111e">
+<link rel="stylesheet" href="desk.css?v=20261112a">
 </head>
 <body>
+<div id="toast" role="status" hidden></div>
 <header id="top" hidden>
   <b>审稿台</b><span id="who"></span>
   <span class="grow"></span>
@@ -22,7 +24,7 @@
   <label>审稿仓库<input id="repo" placeholder="账号/仓库名" autocomplete="off" spellcheck="false"></label>
   <label>GitHub 口令<input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_… 或 ghp_…"></label>
   <label class="row"><input id="remember" type="checkbox" checked> 在这台电脑上记住（不勾就是关掉浏览器标签后要重新贴）</label>
-  <div><button id="enter" type="button">登录</button> <span id="loginmsg" class="msg"></span></div>
+  <div><button id="enter" type="button" class="primary">登录</button> <span id="loginmsg" class="msg"></span></div>
   <details>
     <summary>口令怎么生成（第一次用看这里）</summary>
     <ol>
@@ -37,14 +39,16 @@
 </section>
 
 <section id="list" hidden>
-  <nav id="tabs"></nav>
   <nav id="domains" hidden></nav>
+  <nav id="tabs"></nav>
+  <p id="stagehint" class="sub"></p>
+  <div id="continue" hidden></div>
   <div id="progress"></div>
   <table>
     <thead><tr><th>片子</th><th>状态</th><th></th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
-  <p class="sub">点「开始」就认领了这一集（别人能看到是你在做）；做完点页面底下的提交按钮。列表每分钟自己刷新一次。</p>
+  <p class="sub">点一行就打开；点「开始」就认领了这一集（别人能看到是你在做）。填到一半关掉也不怕：内容自动存在这台电脑上，再打开接着填。<span id="fresh"></span></p>
 </section>
 
 <section id="task" hidden>
@@ -53,11 +57,12 @@
     <b id="tasktitle"></b>
     <span id="taskmsg" class="msg"></span>
     <span class="grow"></span>
+    <button id="next" type="button" class="primary" hidden>下一集 →</button>
     <button id="release" type="button" title="不做这一集了，让别人做">放弃认领</button>
   </div>
   <iframe id="frame" title="审稿页面" sandbox="allow-scripts allow-forms allow-popups"></iframe>
 </section>
 
-<script type="module" src="desk.js?v=20261111e"></script>
+<script type="module" src="desk.js?v=20261112a"></script>
 </body>
 </html>
